@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt")
 const { v4: uuid } = require("uuid")
-const { Roles, Status, Envs, Users } = require("../models")
+const { Role, Status, Env, User } = require("../models")
 
 module.exports = async () => {
    // SEEDERS STATUS DEFAUT
@@ -10,11 +10,11 @@ module.exports = async () => {
          status = await Status.bulkCreate([
             {
                id: 1,
-               name: 'actif'
+               name: 'active'
             },
             {
                id: 2,
-               name: 'inactif'
+               name: 'inactive'
             }
          ])
 
@@ -24,9 +24,9 @@ module.exports = async () => {
       console.log('===================Status defauld initialized !===================')
 
       // SEEDERS ROLES DEFAUT
-      let roles = await Roles.findAll()
+      let roles = await Role.findAll()
       if (roles.length == 0) {
-         roles = await Roles.bulkCreate([
+         roles = await Role.bulkCreate([
             {
                id: 1,
                name: 'super admin'
@@ -47,15 +47,15 @@ module.exports = async () => {
       console.log('===================Roles defauld initialized !===================')
 
       // SEEDERS ENVS DEFAUT
-      let envs = await Envs.findAll()
+      let envs = await Env.findAll()
       if (envs.length == 0) {
-         envs = await Envs.bulkCreate([
+         envs = await Env.bulkCreate([
             {
-               id: 0,
+               id: 1,
                name: 'internal'
             },
             {
-               id: 1,
+               id: 2,
                name: 'external'
             }
          ])
@@ -66,13 +66,13 @@ module.exports = async () => {
       console.log('===================Envs defauld initialized !===================')
 
       // SEEDERS USERS DEFAUT
-      let user = await Users.findOne({ where: { email: "marlexapong90@gmail.com" } })
+      let user = await User.findOne({ where: { email: "marlexapong90@gmail.com" } })
 
       if (!user) {
          const hash = await bcrypt.hash("Marley@123", parseInt(process.env.BCRYPT_SALT_ROUND))
          if (!hash) console.error("===================Error hash password user defauld !===================")
 
-         user = await Users.create({
+         user = await User.create({
             id: uuid(),
             idRole: 1,
             idEnv: 1,

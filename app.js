@@ -11,7 +11,16 @@ require('./associations')
 //GET ALL ROUTES
 const errorHandler = require('./middlewares/errorHandler')
 const authRouter = require('./routes/auth')
-const usersRouter = require('./routes/users')
+const userRouter = require('./routes/user')
+const customerRouter = require('./routes/customer')
+const roleRouter = require('./routes/role')
+const statusRouter = require('./routes/status')
+const envRouter = require('./routes/env')
+const eventRouter = require('./routes/event')
+const typeEventRouter = require('./routes/typeEvent')
+const ticketRouter = require('./routes/ticket')
+const ticketCategoryRouter = require('./routes/ticketCategory')
+
 
 // CREATE SERVER
 const app = express()
@@ -37,7 +46,15 @@ app.get('/', (req, res) => {
 })
 
 app.use('/auth', authRouter)
-app.use('/users', usersRouter)
+app.use('/users', userRouter)
+app.use('/customers', customerRouter)
+app.use('/status', statusRouter)
+app.use('/roles', roleRouter)
+app.use('/envs', envRouter)
+app.use('/event', eventRouter)
+app.use('/type-event', typeEventRouter)
+app.use('/ticket', ticketRouter)
+app.use('/ticket-category', ticketCategoryRouter)
 
 // ROUTE NOT FOUND
 app.use((req, res, next) => {

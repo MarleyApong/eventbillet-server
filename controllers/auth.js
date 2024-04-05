@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { v4: uuid } = require('uuid')
-const { Users, LogsUsers, Status, Roles, Envs } = require('../models')
+const { User, LogsUser, Status, Role, Env } = require('../models')
 const customError = require('../hooks/customError')
 
 exports.connect = async (req, res, next) => {
@@ -9,7 +9,7 @@ exports.connect = async (req, res, next) => {
         const { email, password } = req.body
         if (!email || !password) throw customError('MissingData', 'missing data')
 
-        const user = await Users.findOne({
+        const user = await User.findOne({
             attributes: {
                 exclude: ['createdAt', 'updatedAt', 'deletedAt']
             },
@@ -20,11 +20,11 @@ exports.connect = async (req, res, next) => {
                     attributes: ['id', 'name']
                 },
                 {
-                    model: Roles,
+                    model: Role,
                     attributes: ['id', 'name']
                 },
                 {
-                    model: Envs,
+                    model: Env,
                     attributes: ['id', 'name']
                 },
             ]
@@ -40,7 +40,7 @@ exports.connect = async (req, res, next) => {
         // GENERED TOKEN
         const token = jwt.sign({}, process.env.JWT_SECRET, { expiresIn: process.env.JWT_DURING, algorithm: process.env.JWT_ALGORITHM })
 
-        await LogsUsers.create({
+        await LogsUser.create({
             id: uuid(),
             idUser: user.id,
             login: new Date().toISOString()

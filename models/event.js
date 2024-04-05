@@ -14,6 +14,9 @@ module.exports = (sequelize) => {
          type: DataTypes.STRING,
          allowNull: false
       },
+      description: {
+         type: DataTypes.TEXT
+      },
       nbPlace: {
          type: DataTypes.INTEGER(5),
          allowNull: false

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize')
 
 module.exports = (sequelize) => {
-   const Category = sequelize.define('Category', {
+   const TicketCategory = sequelize.define('Ticket-Category', {
       id: {
          type: DataTypes.STRING(64),
          primaryKey: true,
@@ -12,5 +12,5 @@ module.exports = (sequelize) => {
       }
    }, { paranoid: true })
 
-   return Category
+   return TicketCategory
 }

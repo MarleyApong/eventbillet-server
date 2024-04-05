@@ -1,17 +1,17 @@
 const { DataTypes } = require('sequelize')
 
 module.exports = (sequelize) => {
-   const Sale = sequelize.define('Sale', {
+   const TicketPurchase = sequelize.define('Ticket-Purchase', {
       id: {
          type: DataTypes.STRING(64),
          primaryKey: true,
       },
       idTicket: {
-         type: DataTypes.SMALLINT,
+         type: DataTypes.STRING(64),
          allowNull: false
       },
       idSale: {
-         type: DataTypes.DOUBLE,
+         type: DataTypes.STRING(64),
          allowNull: false
       },
       idCustomer: {
@@ -20,5 +20,5 @@ module.exports = (sequelize) => {
       }
    }, { paranoid: true })
 
-   return Sale
+   return TicketPurchase
 }

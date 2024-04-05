@@ -1,18 +1,15 @@
 const express = require('express')
-const ctrl = require('../controllers/customer')
+const ctrl = require('../controllers/typeEvent')
 const checkToken = require('../middlewares/jwt')
 
 // GET EXPRESS ROUTER
 const router = express.Router()
 
-// ROUTING RESSOURCE CUSTOMER
+// ROUTING RESSOURCE TYPEEVENT
 router.get('/', checkToken, ctrl.getAll)
-router.get('/:id', ctrl.getOne)
-router.post('/sign-in', ctrl.signIn)
-router.post('/sign-up', ctrl.signUp)
-router.post('/check-email', ctrl.checkEmail)
-router.patch('/change-password', ctrl.changePassword)
+router.get('/:id', checkToken, ctrl.getOne)
+router.put('/', checkToken, ctrl.add)
+router.patch('/:id', checkToken, ctrl.update)
 router.patch('/:id/restore', checkToken, ctrl.restore)
 router.delete('/:id', checkToken, ctrl.deleteTrash)
-
 module.exports = router

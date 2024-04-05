@@ -14,11 +14,11 @@ module.exports = (sequelize) => {
          type: DataTypes.STRING,
          allowNull: false
       },
-      prix: {
+      price: {
          type: DataTypes.FLOAT,
          allowNull: false
       },
-      number: {
+      numberId: {
          type: DataTypes.STRING,
          allowNull: false
       }

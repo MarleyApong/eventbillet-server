@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize')
 
 module.exports = (sequelize) => {
-   const ManagerEvent = sequelize.define('ManagerEvent', {
+   const ManagerEvent = sequelize.define('Manager-Event', {
       id: {
          type: DataTypes.STRING(64),
          primaryKey: true,

@@ -76,7 +76,7 @@ exports.getAll = async (req, res, next) => {
          include: [
             {
                model: Status,
-               where: { name: 'actif' }
+               where: { name: 'active' }
             }
          ]
       })
@@ -86,7 +86,7 @@ exports.getAll = async (req, res, next) => {
          include: [
             {
                model: Status,
-               where: { name: 'inactif' }
+               where: { name: 'inactive' }
             }
          ]
       })
@@ -164,10 +164,10 @@ exports.add = async (req, res, next) => {
       const id = uuid()
 
       // GET DATA FOR ADD USER
-      const { idOrganization, idCompany, idRole, env, idStatus, firstName, lastName, phone, email, password } = req.body
+      const { idRole, idEnv, idStatus, firstName, lastName, phone, email, password } = req.body
 
       if (!idRole || !env || !idStatus || !firstName || !phone || !email || !password) throw new customError('MissingData', 'Missing Data')
-      let data = await Users.findOne({ where: { email: email } })
+      let data = await User.findOne({ where: { email: email } })
 
       if (data) throw new customError('UserAlreadyExist', `${label} with ${email} already exists`)
       const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
@@ -177,31 +177,7 @@ exports.add = async (req, res, next) => {
       let hash = await bcrypt.hash(password, parseInt(process.env.BCRYPT_SALT_ROUND))
       if (!hash) throw new customError('ProcessHashFailed', `${label} processing hash failed`)
 
-      if (idOrganization && idCompany) {
-         data = await Organizations.findOne({ where: { id: idOrganization } })
-         if (!data) throw new customError('OrganizationNotFound', `${label} not created because the organization with id: ${idOrganization} does not exist`)
-
-         data = await Companies.findOne({ where: { id: idCompany } })
-         if (!data) throw new customError('CompanyNotFound', `${label} not created because the company with id: ${idCompany} does not exist`)
-      }
-
-      // const role = await Roles.findOne({ where: { id: idRole } })
-      // if (role.name === 'super admin') {
-      //    data = await Users.count({
-      //       include: [
-      //          {
-      //             model: Roles,
-      //             where: { name: 'super admin' }
-      //          }
-      //       ]
-      //    })
-      //    if (data >= 2) throw new customError('AddLimitReached', `unauthorized operation`)
-      // }
-
-      const EnvData = await Envs.findOne({ where: { name: env } })
-      const idEnv = EnvData.id
-
-      data = await Users.create({
+      data = await User.create({
          id: id,
          idRole: idRole,
          idEnv: idEnv,
@@ -213,22 +189,6 @@ exports.add = async (req, res, next) => {
          password: hash
       })
       if (!data) throw new customError('AddUserError', `${label} does not created`,)
-
-      if (idOrganization) {
-         data = await UsersOrganizations.create({
-            id: uuid(),
-            idUser: id,
-            idOrganization: idOrganization
-         })
-      }
-
-      if (idCompany) {
-         data = await UsersCompanies.create({
-            id: uuid(),
-            idUser: id,
-            idCompany: idCompany
-         })
-      }
 
       return res.status(201).json({ message: `${label} created`, data: data })
    }
@@ -245,10 +205,10 @@ exports.update = async (req, res, next) => {
       if (!id) throw new customError('MissingParams', 'missing parameter')
 
       // CHECK THIS USER
-      let data = await Users.findOne({ where: { id: id } })
+      let data = await User.findOne({ where: { id: id } })
       if (!data) throw new customError('UserNotFound', `this ${label} does not exist`)
 
-      data = await Users.update(req.body, { where: { id: id } })
+      data = await User.update(req.body, { where: { id: id } })
       if (!data) throw new customError('UserUpdateError', `${label} does  not modified`)
       return res.json({ message: `${label} modified` })
    }
@@ -265,7 +225,7 @@ exports.changeStatus = async (req, res, next) => {
       if (!id) throw new customError('MissingParams', 'missing parameter')
 
       // CHECK THIS USER
-      let data = await Users.findOne({
+      let data = await User.findOne({
          where: { id: id },
          include: [
             { model: Status }
@@ -274,14 +234,13 @@ exports.changeStatus = async (req, res, next) => {
 
       if (!data) throw new customError('UserNotFound', `this ${label} does not exist`)
 
-      let status = 'actif'
-      if (data.Status.name === 'actif') status = 'inactif'
-      data = await Status.findOne({ where: { name: status } })
+      let idStatus = 1
+      if (data.Status.id === 1) idStatus = 2
 
-      data = await Users.update({ idStatus: data.id }, { where: { id: id } })
+      data = await User.update({ idStatus: data.id }, { where: { id: idStatus } })
       if (!data) throw new customError('StatusUserUpdateError', `${label} not modified`)
 
-      return res.json({ message: `${label} ${status === 'actif' ? 'active' : 'inactive'}` })
+      return res.json({ message: `${label} ${idStatus === 1 ? 'active' : 'inactive'}` })
    }
    catch (err) {
       next(err)
@@ -293,14 +252,14 @@ exports.changeRole = async (req, res, next) => {
    try {
       // GET ID OF USER
       const id = req.params.id
-      const role = req.params.role
+      const idRole = req.params.role
       if (!id) throw new customError('MissingParams', 'missing parameter')
 
       // CHECK THIS USER
-      let data = await Users.findOne({ where: { id: id } })
+      let data = await User.findOne({ where: { id: id } })
       if (!data) throw new customError('UserNotFound', `this ${label} does not exist`)
 
-      data = await Users.update({ idRole: role }, { where: { id: id } })
+      data = await User.update({ idRole: idRole }, { where: { id: id } })
       if (!data) throw new customError('RoleUpdateError', `${label} not modified`)
       return res.json({ message: `Role modified` })
    }
@@ -317,7 +276,7 @@ exports.changePassword = async (req, res, next) => {
       if (!id) throw new customError('MissingParams', 'missing parameter')
 
       // CHECH THIS USER
-      let data = await Users.findOne({ where: { id: id } })
+      let data = await User.findOne({ where: { id: id } })
       if (!data) throw new customError('UserNotFound', `this ${label} does not exist`)
 
       // COMPARE PASSWORD
@@ -332,7 +291,7 @@ exports.changePassword = async (req, res, next) => {
       const hash = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUND))
       if (!hash) throw new customError('ProcessHashFailed', 'wrong password')
 
-      data = await Users.update({ password: hash }, { where: { id: id } })
+      data = await User.update({ password: hash }, { where: { id: id } })
       if (!data) throw new customError('PasswordUserUpdateError', `${label} does not modified`)
       return res.json({ message: 'password modified' })
    }
@@ -349,10 +308,10 @@ exports.delete = async (req, res, next) => {
       if (!id) throw new customError('MissingParams', 'missing parameter')
 
       // CHECK THIS USER
-      let data = await Users.findOne({ where: { id: id } })
+      let data = await User.findOne({ where: { id: id } })
       if (!data) throw new customError('UserNotFound', `${label} not exist`)
 
-      data = await Users.destroy({ where: { id: id }, force: true })
+      data = await User.destroy({ where: { id: id }, force: true })
       if (!data) throw new customError('UserAlreadyDeleted', `${label} not deleted`)
 
       return res.json({ message: `${label} deleted` })
@@ -370,10 +329,10 @@ exports.deleteTrash = async (req, res, next) => {
       if (!id) throw new customError('MissingParams', 'missing parameter')
 
       // CHECK THIS USER
-      let data = await Users.findOne({ where: { id: id } })
+      let data = await User.findOne({ where: { id: id } })
       if (!data) throw new customError('UserNotFound', `${label} not exist`)
 
-      data = await Users.destroy({ where: { id: id } })
+      data = await User.destroy({ where: { id: id } })
       if (!data) throw new customError('UserAlreadyDeleted', `${label} not deleted`)
 
       return res.json({ message: `${label} deleted` })
@@ -391,7 +350,7 @@ exports.restore = async (req, res, next) => {
       if (!id) throw new customError('MissingParams', 'missing parameter')
 
       // CHECK THIS USER
-      let data = await Users.restore({ where: { id: id } })
+      let data = await User.restore({ where: { id: id } })
       if (!data) throw new customError('UserAlreadyRestored', `${label} already restored or does not exist`)
 
       return res.json({ message: `${label} restored` })
