@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "root",
+    "password": null,
+    "database": "evenbillet",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": true
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "miranda",
+    "password": "Ek!1~eu4WbTw0fad",
+    "database": "eventbillet",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
